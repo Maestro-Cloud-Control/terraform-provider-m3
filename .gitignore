@@ -1,0 +1,7 @@
+.idea
+*.iml
+.vscode
+.devcontainer/devcontainer.json
+.devcontainer/Dockerfile
+./vendor
+/example/test/
