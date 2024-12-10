@@ -3,7 +3,7 @@ module terraform-provider-m3
 go 1.18
 
 require (
-	github.com/golang/mock/mockgen v1.6.0
+	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/go-hclog v1.4.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.26.1
