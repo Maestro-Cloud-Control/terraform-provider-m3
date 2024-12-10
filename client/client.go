@@ -15,7 +15,6 @@ const (
     headerAccept           = "Accept"
     headerAuthentication   = "maestro-authentication"
     headerClientIdentifier = "maestro-request-identifier"
-    headerUserIdentifier   = "maestro-user-identifier"
     headerDate             = "maestro-date"
     headerAccessKey        = "maestro-accesskey"
     headerSdkVersion       = "maestro-sdk-version"

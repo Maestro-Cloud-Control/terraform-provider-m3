@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+0.6.3
+=======
+* Removed obsolete auth header
+
 0.6.1
 =======
 * Added data resource for describing placement parameters.

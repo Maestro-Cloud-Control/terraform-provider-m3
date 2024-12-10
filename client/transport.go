@@ -46,7 +46,6 @@ func (t *Transport) createRequest(body interface{}) (*http.Request, error) {
     req.Header.Add(headerAccept, valueAccept)
     req.Header.Add(headerAuthentication, t.config.generateSign(date))
     req.Header.Add(headerClientIdentifier, valueClientIdentifier)
-    req.Header.Add(headerUserIdentifier, t.config.UserIdentifier)
     req.Header.Add(headerDate, date)
     req.Header.Add(headerAccessKey, t.config.AccessKey)
     req.Header.Add(headerSdkVersion, valueSdkVersion)

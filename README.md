@@ -28,17 +28,17 @@ go test ./service -v
 To build plugin run:
 ```buildoutcfg
 #linux
-go build -o terraform-provider-m3_v0.6.1
+go build -o terraform-provider-m3_v0.6.3
 #windows
-go build -o terraform-provider-m3_v0.6.1.exe
+go build -o terraform-provider-m3_v0.6.3.exe
 ```
 
 After that move it to user plugins directory (see https://www.terraform.io/docs/plugins/basics.html)
 ```buildoutcfg
 #linux
-mv terraform-provider-m3_v0.6.1 ~/.terraform.d/plugins
+mv terraform-provider-m3_v0.6.3 ~/.terraform.d/plugins
 #windows
-move terraform-provider-m3_v0.6.1.exe %APPDATA%\terraform.d\plugins
+move terraform-provider-m3_v0.6.3.exe %APPDATA%\terraform.d\plugins
 ```
 
 Then you can work with it like with any other provider.
@@ -74,4 +74,4 @@ Use M3 provider to interact with the Maestro3 resources.
 ## Provider
 | Name               | Version |
 |--------------------|---------|
-| [m3](#provider_m3) | 0.6.1   |
+| [m3](#provider_m3) | 0.6.3   |
