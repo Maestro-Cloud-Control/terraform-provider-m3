@@ -69,6 +69,7 @@ func TestWait_Wait(t *testing.T) {
 
             w := wait{
                 Delay:     1,
+                Attempts:  5,
                 Action:    testCase.WaitAction(&s),
                 CompareFn: testCase.WaitCompareFunc,
             }

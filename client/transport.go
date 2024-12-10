@@ -4,7 +4,7 @@ import (
     "bytes"
     "encoding/json"
     "fmt"
-    "io/ioutil"
+    "io"
     "log"
     "net/http"
     "strconv"
@@ -24,13 +24,17 @@ func (t *Transport) createRequest(body interface{}) (*http.Request, error) {
     var requestData []interface{}
     requestData = append(requestData, body)
     requestDataJSON, err := json.Marshal(requestData)
-    out := bytes.Buffer{}
-    json.Indent(&out, requestDataJSON, "", "\t")
-    log.Printf("Request data:\n%s\n", out.String())
-
     if err != nil {
         return nil, fmt.Errorf("%v: %v", "can not serialize request", err)
     }
+    out := bytes.Buffer{}
+    err = json.Indent(&out, requestDataJSON, "", "\t")
+    if err != nil {
+        log.Fatalf("Failed to indent JSON: %v", err)
+    }
+    log.Printf("Request data:\n%s\n", out.String())
+
+
     encryptedRequestBody, err := t.config.encrypt(requestDataJSON)
     if err != nil {
         return nil, fmt.Errorf("%v: %v", "can not ecript request", err)
@@ -46,7 +50,6 @@ func (t *Transport) createRequest(body interface{}) (*http.Request, error) {
     req.Header.Add(headerAccept, valueAccept)
     req.Header.Add(headerAuthentication, t.config.generateSign(date))
     req.Header.Add(headerClientIdentifier, valueClientIdentifier)
-    req.Header.Add(headerUserIdentifier, t.config.UserIdentifier)
     req.Header.Add(headerDate, date)
     req.Header.Add(headerAccessKey, t.config.AccessKey)
     req.Header.Add(headerSdkVersion, valueSdkVersion)
@@ -75,7 +78,7 @@ func (t *Transport) Do(body interface{}) (*M3BatchResult, error) {
         }
     }()
 
-    respBody, err := ioutil.ReadAll(resp.Body)
+    respBody, err := io.ReadAll(resp.Body)
     if err != nil {
         return nil, fmt.Errorf("%v: %v", "failed to process response", err)
     }
@@ -91,7 +94,10 @@ func (t *Transport) Do(body interface{}) (*M3BatchResult, error) {
     }
 
     out := bytes.Buffer{}
-    json.Indent(&out, []byte(decryptedResponse), "", "\t")
+    err = json.Indent(&out, []byte(decryptedResponse), "", "\t")
+    if err != nil {
+        log.Fatalf("Failed to indent JSON: %v", err)
+    }
     log.Printf("Response data:\n%s\n", out.String())
 
     result := new(M3BatchResult)

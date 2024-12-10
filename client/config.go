@@ -96,7 +96,8 @@ func NewConfig(url, userIdentifier, accessKey, secretKey, tenantName, regionName
 func generateUUID() string {
     id, err := uuid.NewUUID()
     if err != nil {
-        // handle error
+        log.Printf("Failed to generate UUID: %v", err)
+        return ""
     }
     return id.String()
 }

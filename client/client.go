@@ -1,6 +1,7 @@
 package client
 
-//go:generate mockgen -source ./client/client.go -destination ./client/mock/client_mock.go -package cmock
+//go:generate go install github.com/golang/mock/mockgen@v1.6.0
+//go:generate mockgen -source ./client.go -destination ./mock/client_mock.go -package cmock
 
 const (
     method = "POST"
@@ -15,14 +16,10 @@ const (
     headerAccept           = "Accept"
     headerAuthentication   = "maestro-authentication"
     headerClientIdentifier = "maestro-request-identifier"
-    headerUserIdentifier   = "maestro-user-identifier"
     headerDate             = "maestro-date"
     headerAccessKey        = "maestro-accesskey"
     headerSdkVersion       = "maestro-sdk-version"
     headerAsync            = "maestro-sdk-async"
-
-    defaultHeaderEventGroup = "priv_cloud_action"
-    defaultZippedHeader     = "zipped"
 )
 
 // Transporter interface witch provide transports possibility

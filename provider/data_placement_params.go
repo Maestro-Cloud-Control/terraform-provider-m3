@@ -99,7 +99,7 @@ func processDataItem(item *service.DataItem, d *schema.ResourceData, dataMap map
         if option.Title == paramTitle {
             processed = true
             dataMap[item.Name] = option.Value
-            if option.Items != nil && len(option.Items) > 0 {
+            if len(option.Items) > 0 {
                 for _, nestedItem := range option.Items {
                     err := processDataItem(&nestedItem, d, dataMap)
                     if err != nil {

@@ -2,7 +2,8 @@ package service
 
 import "terraform-provider-m3/client"
 
-//go:generate mockgen -source ./service/service.go -destination ./service/mock/service_mock.go -package smock
+//go:generate go install github.com/golang/mock/mockgen@v1.6.0
+//go:generate mockgen -source ./service.go -destination ./mock/service_mock.go -package smock
 
 // DefaultRequestParams contains fields that every request needs to be executed correctly
 type DefaultRequestParams struct {

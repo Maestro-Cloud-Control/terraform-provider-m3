@@ -1,7 +1,6 @@
 package provider
 
 import (
-    "errors"
     "fmt"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
     "terraform-provider-m3/service"
@@ -109,7 +108,7 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) (err error) 
                 return nil, err
             }
             if volume.State != neededState {
-                return nil, errors.New(fmt.Sprintf("volume state: not %s", neededState))
+                return nil, fmt.Errorf("volume state: not %s", neededState)
             }
             return volume, nil
         },
