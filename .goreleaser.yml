@@ -1,3 +1,4 @@
+version: 2
 before:
   hooks:
     - go mod tidy
@@ -48,4 +49,4 @@ release:
       name_template: '{{ .ProjectName }}_{{ .Version }}_manifest.json'
   # draft: true
 changelog:
-  skip: true
+  disable: true
