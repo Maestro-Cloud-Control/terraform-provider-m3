@@ -83,7 +83,7 @@ func DataChefCreate(d *schema.ResourceData, meta interface{}) (err error) {
         if role.RoleName == filter.Chef {
             for _, reqParameter := range role.RequiredParameters {
                 if _, consist := filter.Parameters[reqParameter]; !consist {
-                    return errors.New(fmt.Sprintf("not enough required parameters, required parameters: %s", reqParameter))
+                    return fmt.Errorf("not enough required parameters, required parameters: %s", reqParameter)
                 }
             }
 
@@ -92,5 +92,5 @@ func DataChefCreate(d *schema.ResourceData, meta interface{}) (err error) {
         }
     }
 
-    return errors.New(fmt.Sprintf("chef profile did not find, aloved values: %v", chefs.Roles))
+    return fmt.Errorf("chef profile did not find, aloved values: %v", chefs.Roles)
 }

@@ -20,9 +20,6 @@ const (
     headerAccessKey        = "maestro-accesskey"
     headerSdkVersion       = "maestro-sdk-version"
     headerAsync            = "maestro-sdk-async"
-
-    defaultHeaderEventGroup = "priv_cloud_action"
-    defaultZippedHeader     = "zipped"
 )
 
 // Transporter interface witch provide transports possibility

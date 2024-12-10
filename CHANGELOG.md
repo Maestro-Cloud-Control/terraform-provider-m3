@@ -4,6 +4,8 @@ CHANGELOG
 0.6.3
 =======
 * Removed obsolete auth header
+* Refactoring
+* Go version increased to 1.23.4
 
 0.6.1
 =======

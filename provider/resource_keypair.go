@@ -38,7 +38,7 @@ func resourceKeypair() *schema.Resource {
                 Type:        schema.TypeString,
                 Required:    true,
                 Description: "The name of the public SSH key.",
-                ValidateFunc: validation.StringMatch(regexp.MustCompile("^[a-zA-Z0-9-_]{6,32}$"),
+                ValidateFunc: validation.StringMatch(regexp.MustCompile(`^[a-zA-Z0-9-_]{6,32}$`),
                     "SSH key name must be 6-32 characters long, and include only these characters: '0-9', 'a-z', 'A-Z', '-_'."),
             },
 
@@ -53,7 +53,7 @@ func resourceKeypair() *schema.Resource {
                 Type:        schema.TypeString,
                 Required:    true,
                 Description: "The public SSH key content.",
-                ValidateFunc: validation.StringMatch(regexp.MustCompile("^(.*?)(AAAAB3NzaC1yc[0-9A-Za-z+/\\n]{256,}[=]{0,3})(.*)$"),
+                ValidateFunc: validation.StringMatch(regexp.MustCompile(`^(.*?)(AAAAB3NzaC1yc[0-9A-Za-z+/\\n]{256,}[=]{0,3})(.*)$`),
                     "Failed to parse the SSH public key. Please, check that your value is in the SSH or SSH2 format."),
             },
 

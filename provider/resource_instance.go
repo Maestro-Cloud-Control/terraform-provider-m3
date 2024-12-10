@@ -172,7 +172,7 @@ func resourceInstanceCreate(d *schema.ResourceData, meta interface{}) (err error
     stopAfter := d.Get("stop_after").(int)
     terminateAfter := d.Get("terminate_after").(int)
     if terminateAfter != 0 && stopAfter != 0 && stopAfter >= terminateAfter {
-        return errors.New(fmt.Sprintf("impossible stop instance: %s ,when it will be terminate.", d.Get("instance_name").(string)))
+        return fmt.Errorf("impossible stop instance: %s ,when it will be terminate.", d.Get("instance_name").(string))
     }
 
     defaultParams := &service.DefaultRequestParams{
@@ -208,9 +208,14 @@ func resourceInstanceCreate(d *schema.ResourceData, meta interface{}) (err error
         return err
     }
     d.SetId(instance.InstanceID)
-    d.Set("lock_termination", instance.LockedTermination)
-    d.Set("cloud", instance.Cloud)
-
+    err = d.Set("lock_termination", instance.LockedTermination)
+    if err != nil {
+        return err
+    }
+    err = d.Set("cloud", instance.Cloud)
+    if err != nil {
+        return err
+    }
     w := wait{
         Action: func() (interface{}, error) {
             instance, err := m.Service.InstanceServicer.Describe(

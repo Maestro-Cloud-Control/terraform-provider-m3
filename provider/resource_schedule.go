@@ -51,7 +51,7 @@ func resourceSchedule() *schema.Resource {
                 Required:     true,
                 ForceNew:     true,
                 Description:  "The name of schedule.",
-                ValidateFunc: validation.StringMatch(regexp.MustCompile("^[\\.\\-_A-Za-z0-9]{0,50}$"), "Invalid `schedule`"),
+                ValidateFunc: validation.StringMatch(regexp.MustCompile(`^[\\.\\-_A-Za-z0-9]{0,50}$`), "Invalid schedule name"),
             },
             "description": {
                 Type:        schema.TypeString,
@@ -80,7 +80,8 @@ func resourceSchedule() *schema.Resource {
                 Required:     true,
                 ForceNew:     true,
                 Description:  "A cron expression identifying the schedule by which the action should be taken.",
-                ValidateFunc: validation.StringMatch(regexp.MustCompile("^([^ ]+) ([^ ]+ ){3,5}([^ ]+)$"), "Cron expression must contain these parameters separated by spaces: minutes, hours, days of month, months, and days of weeks."),
+                ValidateFunc: validation.StringMatch(regexp.MustCompile(`^([^ ]+) ([^ ]+ ){3,5}([^ ]+)$`),
+                "Cron expression must contain these parameters separated by spaces: minutes, hours, days of month, months, and days of weeks."),
             },
             "instances_id": {
                 Type:        schema.TypeList,
@@ -166,6 +167,7 @@ func resourceScheduleCreate(d *schema.ResourceData, meta interface{}) (err error
     }
     if schedule == nil {
         m.Log.Info("some troubles with schedule: ", d.Get("schedule_name"))
+        return fmt.Errorf("Some troubles with schedule: %s", d.Get("schedule_name"))
     }
     d.SetId(schedule.Name)
     return resourceScheduleRead(d, meta)

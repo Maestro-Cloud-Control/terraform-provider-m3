@@ -22,7 +22,7 @@ func resourceScript() *schema.Resource {
                 Type:         schema.TypeString,
                 Required:     true,
                 Description:  "The name of the script.",
-                ValidateFunc: validation.StringMatch(regexp.MustCompile("^[\\.\\-_A-Za-z0-9]{6,32}$"), "Invalid name"),
+                ValidateFunc: validation.StringMatch(regexp.MustCompile(`^[\\.\\-_A-Za-z0-9]{6,32}$`), "Invalid name"),
             },
 
             "content": {
