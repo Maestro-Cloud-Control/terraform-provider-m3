@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+0.6.7
+=======
+* Added userIdentifier(email) to sdk request header
+
 0.6.6
 =======
 * Fixed checksum
