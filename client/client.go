@@ -18,6 +18,7 @@ const (
     headerClientIdentifier = "maestro-request-identifier"
     headerDate             = "maestro-date"
     headerAccessKey        = "maestro-accesskey"
+    headerUserIdentifier   = "maestro-user-identifier"
     headerSdkVersion       = "maestro-sdk-version"
     headerAsync            = "maestro-sdk-async"
 )

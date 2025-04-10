@@ -54,6 +54,7 @@ func (t *Transport) createRequest(body interface{}) (*http.Request, error) {
     req.Header.Add(headerAccessKey, t.config.AccessKey)
     req.Header.Add(headerSdkVersion, valueSdkVersion)
     req.Header.Add(headerAsync, valueAsync)
+    req.Header.Add(headerUserIdentifier, t.config.UserIdentifier)
 
     req.Close = true
 
