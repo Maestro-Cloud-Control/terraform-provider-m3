@@ -152,7 +152,7 @@ func (c *Config) decrypt(response []byte) (string, error) {
 
 func (c *Config) generateSign(date string) string {
     mac := hmac.New(sha256.New, []byte(c.SecretKey+date))
-    message := "M3-POST:" + c.AccessKey + ":" + date
+    message := "M3-POST:" + c.AccessKey + ":" + date + ":" + c.UserIdentifier
     mac.Write([]byte(message))
 
     var stringBuilder strings.Builder

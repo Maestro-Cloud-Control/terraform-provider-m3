@@ -1,7 +1,11 @@
 CHANGELOG
 =========
 
-0.6.3
+0.6.5
+=======
+* Added userIdentifier(email) to sdk request signature
+
+0.6.4
 =======
 * Removed obsolete auth header
 * Refactoring
