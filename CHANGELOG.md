@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+0.6.6
+=======
+* Fixed checksum
+
 0.6.5
 =======
 * Added userIdentifier(email) to sdk request signature
