@@ -19,12 +19,13 @@ package provider
 import (
     "errors"
     "fmt"
-    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-    uuid "github.com/nu7hatch/gouuid"
     "regexp"
     "terraform-provider-m3/service"
     "terraform-provider-m3/utils"
+
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+    uuid "github.com/nu7hatch/gouuid"
 )
 
 func resourceInstance() *schema.Resource {
@@ -148,6 +149,18 @@ func resourceInstance() *schema.Resource {
                 ForceNew:    true,
                 Description: "The cloud. \nAllowed values: [AWS, AZURE, GOOGLE, NUTANIX, OPEN_STACK, VSPHERE, VMWARE, YANDEX].",
             },
+            "security_groups": {
+                Type:        schema.TypeList,
+                Optional:    true,
+                ForceNew:    true,
+                Description: "List of security group ids",
+            },
+            "sub_network": {
+                Type:        schema.TypeString,
+                Optional:    true,
+                ForceNew:    true,
+                Description: "Id of the subnet where VM will be started.",
+            },
         },
     }
 }
@@ -172,7 +185,18 @@ func resourceInstanceCreate(d *schema.ResourceData, meta interface{}) (err error
     stopAfter := d.Get("stop_after").(int)
     terminateAfter := d.Get("terminate_after").(int)
     if terminateAfter != 0 && stopAfter != 0 && stopAfter >= terminateAfter {
-        return fmt.Errorf("impossible stop instance: %s ,when it will be terminate.", d.Get("instance_name").(string))
+        return fmt.Errorf("impossible stop instance: %s ,when it will be terminate", d.Get("instance_name").(string))
+    }
+
+    subNetwork := d.Get("sub_network").(string)
+    rawSecurityGroups := d.Get("security_groups").([]interface{})
+    var securityGroups []string
+    for _, sg := range rawSecurityGroups {
+        securityGroups = append(securityGroups, sg.(string))
+    }
+
+    if (subNetwork == "" && len(securityGroups) > 0) || (subNetwork != "" && len(securityGroups) == 0) {
+        return fmt.Errorf("both 'subNetwork' and 'securityGroups' must be set together or both must be omitted")
     }
 
     defaultParams := &service.DefaultRequestParams{
@@ -196,6 +220,8 @@ func resourceInstanceCreate(d *schema.ResourceData, meta interface{}) (err error
         AdditionalData:       d.Get("additional_data").(map[string]interface{}),
         Tags:                 d.Get("tags").(map[string]interface{}),
         InstancesCount:       d.Get("instances_count").(int),
+        SubNetwork:           subNetwork,
+        SecurityGroups:       securityGroups,
     }
     if stopAfter != 0 {
         opts.StopAfter = &service.StopAfter{StopAfter: stopAfter}

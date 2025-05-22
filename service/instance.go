@@ -85,6 +85,8 @@ type InstanceRunRequest struct {
     ChefProfile      string `json:"chefProfile"`
     *StopAfter
     *TerminateAfter
+    SubNetwork       string `json:"subNetwork"`
+    SecurityGroups   []string                `json:"securityGroups"`
     LockedTermination bool                   `json:"lockedTermination"`
     AdditionalData    map[string]interface{} `json:"additionalData"`
     Tags              map[string]interface{} `json:"tags"`
