@@ -153,13 +153,16 @@ func resourceInstance() *schema.Resource {
                 Type:        schema.TypeList,
                 Optional:    true,
                 ForceNew:    true,
-                Description: "List of security group ids",
+                Description: "List of security group ids. Available only for AWS cloud.",
+                Elem: &schema.Schema{
+                    Type: schema.TypeString,
+                },
             },
             "sub_network": {
                 Type:        schema.TypeString,
                 Optional:    true,
                 ForceNew:    true,
-                Description: "Id of the subnet where VM will be started.",
+                Description: "Id of the subnet where VM will be started. Available only for AWS cloud.",
             },
         },
     }
