@@ -16,8 +16,8 @@ Upload script to the tenant's library in Maestro.
 resource "m3_script" "my_script1" {
   name = "script"
   content = <<EOF
-	#! /bin/bash
-	sudo apt-get update
+    #! /bin/bash
+    sudo apt-get update
 sudo apt-get install -y apache2
 sudo systemctl start apache2
 sudo systemctl enable apache2
@@ -41,8 +41,8 @@ resource "m3_script" "my_script1" {
 resource "m3_script" "my_script1" {
   name = "script"
   content = <<EOF
-	#! /bin/bash
-	sudo apt-get update
+    #! /bin/bash
+    sudo apt-get update
 sudo apt-get install -y apache2
 sudo systemctl start apache2
 sudo systemctl enable apache2

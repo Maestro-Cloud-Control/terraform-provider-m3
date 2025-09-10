@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+0.6.8
+=======
+* Added security_groups and sub_network parameters to instance to allow custom network configuration for vm
+
 0.6.7
 =======
 * Added userIdentifier(email) to sdk request header
