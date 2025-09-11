@@ -1,6 +1,13 @@
 CHANGELOG
 =========
 
+0.6.9
+=======
+* Added network describe network configuration support for instances: new describe block + computed fields public_ip, public_dns, private_ip, private_dns with polling after creation
+* Updated Go version to 1.24.7 and refreshed dependencies (incl. go-hclog, plugin docs)
+* Extended tests to cover IP/DNS parsing
+* Minor docs cleanup and formatting fixes
+
 0.6.8
 =======
 * Added security_groups and sub_network parameters to instance to allow custom network configuration for vm

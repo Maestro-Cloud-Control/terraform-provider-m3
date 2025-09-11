@@ -78,5 +78,3 @@ Allowed values [ AWS, AZURE, GOOGLE, NUTANIX, OPEN_STACK, VSPHERE, VMWARE, YANDE
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

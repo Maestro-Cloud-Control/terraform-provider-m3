@@ -50,6 +50,9 @@ type Instance struct {
     Image             string                 `json:"imageId"`
     Shape             string                 `json:"instanceType"`
     PrivateIP         string                 `json:"privateIpAddress"`
+    PublicIP          string                 `json:"publicIpAddress"`
+    PublicDNS         string                 `json:"publicDnsName"`
+    PrivateDNS        string                 `json:"privateDnsName"`
     LockedTermination bool                   `json:"lockedTermination"`
     ChefEnabled       bool                   `json:"installChefClient"`
     InstanceChefUUID  string                 `json:"insanceChefUuid"`
@@ -186,6 +189,9 @@ func (s *InstancesService) Run(request *InstanceRunRequest) (*Instance, error) {
             Architecture:      i.Architecture,
             Image:             i.Image,
             Shape:             i.Shape,
+            PublicIP:          i.PublicIP,
+            PublicDNS:         i.PublicDNS,
+            PrivateDNS:        i.PrivateDNS,
             PrivateIP:         i.PrivateIP,
             LockedTermination: request.LockedTermination,
             ChefEnabled:       request.ChefEnabled,
@@ -267,6 +273,9 @@ func (s *InstancesService) Describe(request *InstanceDescribeRequest) (*Instance
                 Image:            i.Image,
                 Shape:            i.Shape,
                 PrivateIP:        i.PrivateIP,
+                PublicIP:         i.PublicIP,
+                PublicDNS:        i.PublicDNS,
+                PrivateDNS:       i.PrivateDNS,
                 AvailabilityZone: i.AvailabilityZone,
                 ResourceGroup:    i.ResourceGroup,
                 VolumesIds:       i.VolumesIds,

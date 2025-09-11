@@ -28,6 +28,15 @@ import (
     uuid "github.com/nu7hatch/gouuid"
 )
 
+const (
+    describeAttempts  = 10
+    describeDelaySec  = 60
+)
+
+type describeCfg struct {
+    PubIP, PubDNS, PrivIP, PrivDNS bool
+}
+
 func resourceInstance() *schema.Resource {
     return &schema.Resource{
         Update:      resourceInstanceUpdate,
@@ -89,6 +98,26 @@ func resourceInstance() *schema.Resource {
                 Default:     "",
                 Description: "The name of the chef application.",
             },
+            "public_ip":  {
+                Type: schema.TypeString,
+                Computed: true,
+                Description: "Instance public IPv4 address, if assigned",
+            },
+            "public_dns": {
+                Type: schema.TypeString,
+                Computed: true,
+                Description: "Instance public DNS address, if assigned",
+            },
+            "private_ip": {
+                Type: schema.TypeString,
+                Computed: true,
+                Description: "Instance private IPv4 address, if assigned",
+            },
+            "private_dns":{
+                Type: schema.TypeString,
+                Computed: true,
+                Description: "Instance private DNS address, if assigned",
+            },
             "additional_data": {
                 Type:        schema.TypeMap,
                 Optional:    true,
@@ -97,6 +126,36 @@ func resourceInstance() *schema.Resource {
                 Elem: &schema.Schema{
                     Type: schema.TypeString,
                 },
+            },
+            "describe": {
+                Type:     schema.TypeList,
+                Optional: true,
+                MaxItems: 1,
+                Elem: &schema.Resource{
+                    Schema: map[string]*schema.Schema{
+                        "public_ip":   {
+                            Type: schema.TypeBool,
+                            Optional: true,
+                            Default: true,
+                        },
+                        "public_dns":  {
+                            Type: schema.TypeBool,
+                            Optional: true,
+                            Default: true,
+                        },
+                        "private_ip":  {
+                            Type: schema.TypeBool,
+                            Optional: true,
+                            Default: true,
+                        },
+                        "private_dns": {
+                            Type: schema.TypeBool,
+                            Optional: true,
+                            Default: true,
+                        },
+                    },
+                },
+                Description: "Network describe parameters.",
             },
             "owner": {
                 Type:        schema.TypeString,
@@ -166,6 +225,107 @@ func resourceInstance() *schema.Resource {
             },
         },
     }
+}
+
+
+func getDescribeCfg(d *schema.ResourceData) describeCfg {
+    cfg := describeCfg{
+        PubIP: true,
+        PubDNS: true,
+        PrivIP: true,
+        PrivDNS: true,
+    }
+    v, ok := d.GetOk("describe")
+    if !ok { 
+        return cfg 
+    }
+    lst := v.([]interface{})
+    if len(lst) == 0 || lst[0] == nil { 
+        return cfg 
+    }
+    m := lst[0].(map[string]interface{})
+    if x, ok := m["public_ip"].(bool); ok  { 
+        cfg.PubIP = x 
+    }
+    if x, ok := m["public_dns"].(bool); ok { 
+        cfg.PubDNS = x 
+    }
+    if x, ok := m["private_ip"].(bool); ok { 
+        cfg.PrivIP = x 
+    }
+    if x, ok := m["private_dns"].(bool); ok { 
+        cfg.PrivDNS = x 
+    }
+    return cfg
+}
+
+
+func waitDescribeAndSet(d *schema.ResourceData, meta interface{}) error {
+    m := meta.(*Meta)
+    if d.Id() == "" {
+         return nil
+    }
+
+    cfg := getDescribeCfg(d)
+
+    if !cfg.PubIP && !cfg.PubDNS && !cfg.PrivIP && !cfg.PrivDNS {
+        return nil
+    }
+
+    tenant, err := utils.GetTenant(d, m.Config)
+    if err != nil { 
+        return err 
+    }
+    region, err := utils.GetRegion(d, m.Config)
+    if err != nil { 
+        return err 
+    }
+
+    w := wait{
+        Attempts:  describeAttempts,
+        Delay:     describeDelaySec,
+        CompareFn: defaultWaitCompareFunc(),
+        Action: func() (interface{}, error) {
+            inst, err := m.Service.InstanceServicer.Describe(
+                &service.InstanceDescribeRequest{
+                    DefaultRequestParams: &service.DefaultRequestParams{
+                        TenantName: tenant,
+                        Region:     region,
+                    },
+                    InstanceIds: []string{d.Id()},
+                })
+            if err != nil { 
+                return nil, err 
+            }
+
+            if cfg.PrivIP  && inst.PrivateIP  == "" { 
+                return nil, fmt.Errorf("private_ip pending") 
+            }
+            if cfg.PrivDNS && inst.PrivateDNS == "" { 
+                return nil, fmt.Errorf("private_dns pending") 
+            }
+            if cfg.PubIP   && inst.PublicIP   == "" { 
+                return nil, fmt.Errorf("public_ip pending") 
+            }
+            if cfg.PubDNS  && inst.PublicDNS  == "" { 
+                return nil, fmt.Errorf("public_dns pending") 
+            }
+
+            return inst, nil
+        },
+    }
+
+    res, err := w.Wait()
+    if err != nil { 
+        return err 
+    }
+
+    inst := res.(*service.Instance)
+    _ = d.Set("private_ip",  inst.PrivateIP)
+    _ = d.Set("private_dns", inst.PrivateDNS)
+    _ = d.Set("public_ip",   inst.PublicIP)
+    _ = d.Set("public_dns",  inst.PublicDNS)
+    return nil
 }
 
 func resourceInstanceCreate(d *schema.ResourceData, meta interface{}) (err error) {
@@ -268,6 +428,9 @@ func resourceInstanceCreate(d *schema.ResourceData, meta interface{}) (err error
     }
 
     m.Log.Info(fmt.Sprintf("Instance created ID: %s", d.Id()))
+    if err := waitDescribeAndSet(d, meta); err != nil {
+        return err
+    }
     return resourceInstanceRead(d, meta)
 }
 
@@ -302,6 +465,11 @@ func resourceInstanceRead(d *schema.ResourceData, meta interface{}) (err error) 
         d.SetId("")
         return nil
     }
+
+    _ = d.Set("private_ip",  instance.PrivateIP)
+    _ = d.Set("private_dns", instance.PrivateDNS)
+    _ = d.Set("public_ip",   instance.PublicIP)
+    _ = d.Set("public_dns",  instance.PublicDNS)
     return nil
 }
 

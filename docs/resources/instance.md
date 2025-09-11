@@ -224,6 +224,7 @@ resource "m3_instance" "my-server" {
 
 - `additional_data` (Map of String) The size of an additional storage volume in GB.
 - `chef_profile` (String) The name of the chef application.
+- `describe` (Block List, Max: 1) Network describe parameters. (see [below for nested schema](#nestedblock--describe))
 - `enable_chef` (Boolean) Enabling chef application.
 - `instances_count` (Number) The number of instances that will be run. The default value is 1 (used if the parameter is not specified).
 - `key` (String) The name of the key pair to be used for the instance. Optional for Azure cloud
@@ -231,7 +232,9 @@ resource "m3_instance" "my-server" {
 Allowed for clouds: [AWS, AZURE, GOOGLE].
 - `owner` (String) Owner identifier.
 - `region` (String) The name of the region where the instance is to be run.
+- `security_groups` (List of String) List of security group ids. Available only for AWS cloud.
 - `stop_after` (Number) The expiration parameter which specifies when the machine will stop, in hours after creation.
+- `sub_network` (String) Id of the subnet where VM will be started. Available only for AWS cloud.
 - `tags` (Map of String) Key value parameter simplifying instance identification.
 - `tenant` (String) The name of the tenant where the instance is to be launched.
 - `terminate_after` (Number) Termination parameter which specifies when the instance will be terminated, in hours after creation.
@@ -241,5 +244,17 @@ Allowed for clouds: [AWS, AZURE, GOOGLE].
 - `cloud` (String) The cloud. 
 Allowed values: [AWS, AZURE, GOOGLE, NUTANIX, OPEN_STACK, VSPHERE, VMWARE, YANDEX].
 - `id` (String) The ID of this resource.
+- `private_dns` (String) Instance private DNS address, if assigned
+- `private_ip` (String) Instance private IPv4 address, if assigned
+- `public_dns` (String) Instance public DNS address, if assigned
+- `public_ip` (String) Instance public IPv4 address, if assigned
 
+<a id="nestedblock--describe"></a>
+### Nested Schema for `describe`
 
+Optional:
+
+- `private_dns` (Boolean)
+- `private_ip` (Boolean)
+- `public_dns` (Boolean)
+- `public_ip` (Boolean)

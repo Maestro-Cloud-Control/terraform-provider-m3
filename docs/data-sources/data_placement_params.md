@@ -29,5 +29,3 @@ The Data placement params resource is used for describing native ids for vm plac
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

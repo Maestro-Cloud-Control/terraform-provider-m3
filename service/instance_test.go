@@ -1135,5 +1135,113 @@ func TestInstancesService_DeleteTags(t *testing.T) {
 
         })
     }
-
 }
+
+func TestInstancesService_Run_ParsesIPDNS(t *testing.T) {
+	ctl := gomock.NewController(t)
+	defer ctl.Finish()
+
+	mockTransporter := cmock.NewMockTransporter(ctl)
+
+	req := &InstanceRunRequest{}
+	instances := InstancesResultData{
+		Instances: []Instance{
+			{
+				InstanceID:   "i-123",
+				Cloud:        "AWS",
+				InstanceName: "name",
+				TenantName:   "NORTH",
+				Region:       "NORTH",
+				State:        "starting", // важно для Run
+				Image:        "ami-1",
+				Shape:        "t3.micro",
+				PrivateIP:    "10.0.0.5",
+				PrivateDNS:   "ip-10-0-0-5.ec2.internal",
+				PublicIP:     "1.2.3.4",
+				PublicDNS:    "ec2-1-2-3-4.compute.amazonaws.com",
+			},
+		},
+	}
+	data, _ := json.Marshal(instances)
+	raw := &client.M3RawResult{ID: "1", Status: "SUCCESS", Data: string(data)}
+	batch := &client.M3BatchResult{Results: []*client.M3RawResult{raw}}
+
+	mockTransporter.EXPECT().MakePayload(req, MethodRunInstance).Return(nil, nil)
+	mockTransporter.EXPECT().Do(nil).Return(batch, nil)
+
+	c := &client.Client{Transporter: mockTransporter}
+	s := NewService(c)
+
+	inst, err := s.InstanceServicer.Run(req)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if inst.PrivateIP != "10.0.0.5" {
+		t.Fatalf("private_ip parsed wrong: %q", inst.PrivateIP)
+	}
+	if inst.PrivateDNS != "ip-10-0-0-5.ec2.internal" {
+		t.Fatalf("private_dns parsed wrong: %q", inst.PrivateDNS)
+	}
+	if inst.PublicIP != "1.2.3.4" {
+		t.Fatalf("public_ip parsed wrong: %q", inst.PublicIP)
+	}
+	if inst.PublicDNS != "ec2-1-2-3-4.compute.amazonaws.com" {
+		t.Fatalf("public_dns parsed wrong: %q", inst.PublicDNS)
+	}
+}
+
+func TestInstancesService_Describe_ParsesIPDNS(t *testing.T) {
+	ctl := gomock.NewController(t)
+	defer ctl.Finish()
+
+	mockTransporter := cmock.NewMockTransporter(ctl)
+
+	req := &InstanceDescribeRequest{}
+	instances := InstancesResultData{
+		Instances: []Instance{
+			{
+				InstanceID:   "i-123",
+				Cloud:        "AWS",
+				InstanceName: "name",
+				TenantName:   "NORTH",
+				Region:       "NORTH",
+				State:        "running",
+				Image:        "ami-1",
+				Shape:        "t3.micro",
+				PrivateIP:    "10.0.0.5",
+				PrivateDNS:   "ip-10-0-0-5.ec2.internal",
+				PublicIP:     "1.2.3.4",
+				PublicDNS:    "ec2-1-2-3-4.compute.amazonaws.com",
+			},
+		},
+	}
+	data, _ := json.Marshal(instances)
+	raw := &client.M3RawResult{ID: "1", Status: "SUCCESS", Data: string(data)}
+	batch := &client.M3BatchResult{Results: []*client.M3RawResult{raw}}
+
+	mockTransporter.EXPECT().MakePayload(req, MethodDescribeInstance).Return(nil, nil)
+	mockTransporter.EXPECT().Do(nil).Return(batch, nil)
+
+	c := &client.Client{Transporter: mockTransporter}
+	s := NewService(c)
+
+	inst, err := s.InstanceServicer.Describe(req)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if inst.PrivateIP != "10.0.0.5" {
+		t.Fatalf("private_ip parsed wrong: %q", inst.PrivateIP)
+	}
+	if inst.PrivateDNS != "ip-10-0-0-5.ec2.internal" {
+		t.Fatalf("private_dns parsed wrong: %q", inst.PrivateDNS)
+	}
+	if inst.PublicIP != "1.2.3.4" {
+		t.Fatalf("public_ip parsed wrong: %q", inst.PublicIP)
+	}
+	if inst.PublicDNS != "ec2-1-2-3-4.compute.amazonaws.com" {
+		t.Fatalf("public_dns parsed wrong: %q", inst.PublicDNS)
+	}
+}
+

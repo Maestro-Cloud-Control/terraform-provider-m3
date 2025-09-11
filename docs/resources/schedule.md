@@ -116,5 +116,3 @@ To set the schedule for several instances, specify the IDs one by one.
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

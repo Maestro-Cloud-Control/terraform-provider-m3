@@ -25,5 +25,3 @@ The Data Chef resource is used for specifying chef profiler for instances.
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

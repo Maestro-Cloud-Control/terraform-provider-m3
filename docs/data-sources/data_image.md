@@ -63,5 +63,3 @@ Allowed values [ L, W ], Linux or Windows.
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-
