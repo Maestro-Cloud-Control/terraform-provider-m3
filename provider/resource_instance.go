@@ -101,22 +101,22 @@ func resourceInstance() *schema.Resource {
             "public_ip":  {
                 Type: schema.TypeString,
                 Computed: true,
-                Description: "Instance public IPv4 address, if assigned"
+                Description: "Instance public IPv4 address, if assigned",
             },
             "public_dns": {
                 Type: schema.TypeString,
                 Computed: true,
-                Description: "Instance public DNS address, if assigned"
+                Description: "Instance public DNS address, if assigned",
             },
             "private_ip": {
                 Type: schema.TypeString,
                 Computed: true,
-                Description: "Instance private IPv4 address, if assigned"
+                Description: "Instance private IPv4 address, if assigned",
             },
             "private_dns":{
                 Type: schema.TypeString,
                 Computed: true,
-                Description: "Instance private DNS address, if assigned"
+                Description: "Instance private DNS address, if assigned",
             },
             "additional_data": {
                 Type:        schema.TypeMap,
