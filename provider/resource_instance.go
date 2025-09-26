@@ -19,7 +19,6 @@ package provider
 import (
     "errors"
     "fmt"
-    "regexp"
     "terraform-provider-m3/service"
     "terraform-provider-m3/utils"
 
@@ -50,8 +49,6 @@ func resourceInstance() *schema.Resource {
                 Required:    true,
                 ForceNew:    true,
                 Description: "The name of the new instance.",
-                ValidateFunc: validation.StringMatch(regexp.MustCompile("^[a-z0-9]{6,63}$"),
-                    "Instance name must start with a letter, can be 6-63 characters long, and can include Latin alphanumeric characters ('a-z', '0-9')."),
             },
             "tenant": {
                 Type:        schema.TypeString,

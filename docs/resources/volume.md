@@ -19,12 +19,18 @@ resource "m3_volume" "my-volume" {
   region = "COMPANY-OPENSTACK-3"
   size_in_gb = "8"
   instance_id = "instance id for attaching"
+  additional_data = {
+    example_key = "example_value"
+  }
 }
 
 resource "m3_volume" "my-volume" {
   name = "name"
   size_in_gb = "8"
   instance_id = "instance id for attaching"
+  additional_data = {
+    example_key = "example_value"
+  }
 }
 ```
 
@@ -38,6 +44,7 @@ resource "m3_volume" "my-volume" {
 
 ### Optional
 
+- `additional_data` (Map of String) Additional cloud related parameter.
 - `instance_id` (String) The ID of the instance to which the volume will be added.
 If not specified, the volume will not be attached to any instance.
 - `region` (String) The region name.

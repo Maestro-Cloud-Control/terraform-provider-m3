@@ -44,6 +44,13 @@ func resourceVolume() *schema.Resource {
                 ForceNew:    true,
                 Description: "The ID of the instance to which the volume will be added.\nIf not specified, the volume will not be attached to any instance.",
             },
+            "additional_data": {
+                Type:        schema.TypeMap,
+                Optional:    true,
+                ForceNew:    true,
+                Description: "Additional cloud related parameter.",
+                Elem: &schema.Schema{Type: schema.TypeString},
+            },
         },
     }
 }
@@ -76,6 +83,7 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) (err error) 
             DefaultRequestParams: defaultParams,
             VolumeName:           d.Get("name").(string),
             SizeInGB:             d.Get("size_in_gb").(int),
+            AdditionalData:       d.Get("additional_data").(map[string]interface{}),
         }
         volume, err = m.Service.VolumeServicer.Create(opts)
         neededState = service.AvailableImageState
@@ -85,6 +93,7 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) (err error) 
             VolumeName:           d.Get("name").(string),
             SizeInGB:             d.Get("size_in_gb").(int),
             InstanceId:           instanceId,
+            AdditionalData:       d.Get("additional_data").(map[string]interface{}),
         }
         volume, err = m.Service.VolumeServicer.CreateAndAttach(opts)
         neededState = service.InUseState

@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+0.6.10
+=======
+* Added additional_data parameter to volume resource.
+* Removed instance name validation constraint to allow broader naming.
+
 0.6.9
 =======
 * Added network describe network configuration support for instances: new describe block + computed fields public_ip, public_dns, private_ip, private_dns with polling after creation
@@ -59,5 +64,3 @@ CHANGELOG
 0.4
 =======
  * Release 0.4 version for m3 terraform provider
-
-
