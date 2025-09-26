@@ -25,16 +25,18 @@ type Volume struct {
 // VolumeCreateRequest request to create volume
 type VolumeCreateRequest struct {
     *DefaultRequestParams
-    VolumeName string `json:"volumeName"`
-    SizeInGB   int    `json:"sizeInGB"`
+    VolumeName      string                 `json:"volumeName"`
+    SizeInGB        int                    `json:"sizeInGB"`
+    AdditionalData  map[string]interface{} `json:"additionalData"`
 }
 
 // VolumeCreateAndAttachRequest request to create and attach volume
 type VolumeCreateAndAttachRequest struct {
     *DefaultRequestParams
-    VolumeName string `json:"volumeName"`
-    SizeInGB   int    `json:"sizeInGB"`
-    InstanceId string `json:"instanceId"`
+    VolumeName     string                 `json:"volumeName"`
+    SizeInGB       int                    `json:"sizeInGB"`
+    InstanceId     string                 `json:"instanceId"`
+    AdditionalData map[string]interface{} `json:"additionalData"`
 }
 
 // VolumeDeleteRequest request to remove volume
