@@ -8,9 +8,7 @@ import (
     "terraform-provider-m3/client"
 )
 
-//AvailableImageState is for image in Available state
 var AvailableImageState = "Available"
-var InUseState = "in-use"
 
 // Image struct contains information about image
 type Image struct {

@@ -8,8 +8,8 @@ import (
     "terraform-provider-m3/client"
 )
 
-// AvailableVolumeState is for volume in available state
-var AvailableVolumeState = "available"
+var AvailableVolumeState = "detached"
+var InUseState = "attached"
 
 // Volume contains information about fields of volume
 type Volume struct {
@@ -39,6 +39,13 @@ type VolumeCreateAndAttachRequest struct {
     AdditionalData map[string]interface{} `json:"additionalData"`
 }
 
+// VolumeDetachRequest request to detach volume from instance
+type VolumeDetachRequest struct {
+    *DefaultRequestParams
+    VolumeID   string `json:"volumeId"`
+    InstanceId string `json:"instanceId"`
+}
+
 // VolumeDeleteRequest request to remove volume
 type VolumeDeleteRequest struct {
     *DefaultRequestParams
@@ -48,8 +55,13 @@ type VolumeDeleteRequest struct {
 // VolumeDescribeRequest request to describe volume
 type VolumeDescribeRequest struct {
     *DefaultRequestParams
-    VolumeIds  []string `json:"volumesIds"`
-    InstanceId string   `json:"instanceId"`
+    VolumeIds        []string `json:"volumeIds"`
+    InstanceId       string  `json:"instanceId"`
+    All              *bool    `json:"all"`
+    Attached         *bool    `json:"attached"`
+    System           *bool    `json:"system"`
+    AvailabilityZone *string  `json:"availabilityZone"`
+    Names            []string `json:"names"`
 }
 
 // VolumeService contains fields needed to implement VolumeServicer interface
@@ -130,6 +142,33 @@ func (s *VolumeService) CreateAndAttach(request *VolumeCreateAndAttachRequest) (
     }
 
     return nil, errors.New("neither 'result' nor 'error' in response")
+}
+
+// Detach is method to detach volume from instance
+func (s *VolumeService) Detach(request *VolumeDetachRequest) error {
+    payload, err := s.trans.MakePayload(request, MethodDetachVolume)
+    if err != nil {
+        return err
+    }
+
+    r, err := s.trans.Do(payload)
+    if err != nil {
+        return err
+    }
+
+    singleResult := r.Results[0]
+
+    if singleResult.Error != "" {
+        if strings.Contains(singleResult.Error, "No unique volume found by volume ID") {
+            return errors.New("404")
+        }
+        return fmt.Errorf("%+v", singleResult.Error)
+    }
+
+    if singleResult.Status == "SUCCESS" {
+        return nil
+    }
+    return errors.New("neither 'result' nor 'error' in response")
 }
 
 // Delete method to delete volume
