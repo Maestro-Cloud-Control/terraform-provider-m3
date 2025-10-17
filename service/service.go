@@ -15,6 +15,7 @@ type DefaultRequestParams struct {
 type VolumeServicer interface {
     Create(*VolumeCreateRequest) (*Volume, error)
     CreateAndAttach(*VolumeCreateAndAttachRequest) (*Volume, error)
+    Detach(*VolumeDetachRequest) error
     Delete(*VolumeDeleteRequest) error
     Describe(*VolumeDescribeRequest) (*Volume, error)
 }

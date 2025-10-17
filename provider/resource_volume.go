@@ -85,8 +85,9 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) (err error) 
             SizeInGB:             d.Get("size_in_gb").(int),
             AdditionalData:       d.Get("additional_data").(map[string]interface{}),
         }
+        m.Log.Info(fmt.Sprintf("Creating volume without instance: %s", opts.VolumeName))
         volume, err = m.Service.VolumeServicer.Create(opts)
-        neededState = service.AvailableImageState
+        neededState = service.AvailableVolumeState
     } else {
         opts := &service.VolumeCreateAndAttachRequest{
             DefaultRequestParams: defaultParams,
@@ -95,44 +96,53 @@ func resourceVolumeCreate(d *schema.ResourceData, meta interface{}) (err error) 
             InstanceId:           instanceId,
             AdditionalData:       d.Get("additional_data").(map[string]interface{}),
         }
+        m.Log.Info(fmt.Sprintf("Creating volume with instance attachment: %s, instance: %s", opts.VolumeName, instanceId))
         volume, err = m.Service.VolumeServicer.CreateAndAttach(opts)
         neededState = service.InUseState
     }
 
-    m.Log.Info(fmt.Sprintf("Creating volume: %s", d.Id()))
-
     if err != nil {
+        m.Log.Info(fmt.Sprintf("Failed to create volume: %s, error: %v", d.Get("name").(string), err))
         return err
     }
 
+    m.Log.Info(fmt.Sprintf("Volume created, ID: %s, waiting for state: %s", volume.VolumeID, neededState))
+
     w := wait{
         Action: func() (interface{}, error) {
-            volume, err := m.Service.VolumeServicer.Describe(
+            m.Log.Info(fmt.Sprintf("Describing volume: %s, instance: %s, tenant: %s, region: %s",
+                volume.VolumeID, instanceId, tenant, region))
+            describedVolume, err := m.Service.VolumeServicer.Describe(
                 &service.VolumeDescribeRequest{
                     DefaultRequestParams: defaultParams,
-                    VolumeIds:            []string{d.Id()},
+                    VolumeIds:            []string{volume.VolumeID},
                     InstanceId:           instanceId,
                 })
             if err != nil {
+                m.Log.Info(fmt.Sprintf("Volume describe failed for volume ID: %s, error: %v", volume.VolumeID, err))
                 return nil, err
             }
-            if volume.State != neededState {
+            m.Log.Info(fmt.Sprintf("Volume describe result: ID: %s, State: %s, Expected: %s",
+                describedVolume.VolumeID, describedVolume.State, neededState))
+            if describedVolume.State != neededState {
                 return nil, fmt.Errorf("volume state: not %s", neededState)
             }
-            return volume, nil
+            return describedVolume, nil
         },
         CompareFn: defaultWaitCompareFunc(),
     }
     _, err = w.Wait()
     if err != nil {
         if err.Error() == "404" {
+            m.Log.Info(fmt.Sprintf("Volume not found during wait: %s", d.Get("volume_name").(string)))
             return fmt.Errorf("volume %s not found", d.Get("volume_name").(string))
         }
+        m.Log.Info(fmt.Sprintf("Error waiting for volume state: %s, error: %v", d.Get("volume_name").(string), err))
         return fmt.Errorf("error wait for state, volume: %s", d.Get("volume_name").(string))
     }
     d.SetId(volume.VolumeID)
 
-    m.Log.Info(fmt.Sprintf("Volume created ID: %s", d.Id()))
+    m.Log.Info(fmt.Sprintf("Volume created successfully, ID: %s", d.Id()))
     return resourceVolumeRead(d, meta)
 }
 
@@ -192,22 +202,90 @@ func resourceVolumeDelete(d *schema.ResourceData, meta interface{}) (err error) 
         Region:     region,
     }
 
-    m.Log.Info("Deleting volume: %s", d.Id())
+    m.Log.Info(fmt.Sprintf("Deleting volume: %s", d.Id()))
 
+    // First, describe the volume to check its state
+    instanceId := d.Get("instance_id").(string)
+    describeOpts := &service.VolumeDescribeRequest{
+        DefaultRequestParams: defaultParams,
+        VolumeIds:            []string{d.Id()},
+        InstanceId:           instanceId,
+    }
+
+    volume, err := m.Service.VolumeServicer.Describe(describeOpts)
+    if err != nil {
+        if err.Error() == "404" {
+            m.Log.Info(fmt.Sprintf("Volume not found, skipping delete: %s", d.Id()))
+            d.SetId("")
+            return nil
+        }
+        return err
+    }
+
+    m.Log.Info(fmt.Sprintf("Volume state: %s", volume.State))
+
+    // If volume is attached, detach it first
+    if volume.State == service.InUseState {
+        m.Log.Info(fmt.Sprintf("Volume is attached, detaching: %s", d.Id()))
+        detachOpts := &service.VolumeDetachRequest{
+            DefaultRequestParams: defaultParams,
+            VolumeID:             d.Id(),
+            InstanceId:           instanceId,
+        }
+        err = m.Service.VolumeServicer.Detach(detachOpts)
+        if err != nil {
+            if err.Error() == "404" {
+                m.Log.Info(fmt.Sprintf("Volume not found during detach, skipping: %s", d.Id()))
+                d.SetId("")
+                return nil
+            }
+            return err
+        }
+
+        // Wait for volume to become detached
+        m.Log.Info(fmt.Sprintf("Waiting for volume to become detached: %s", d.Id()))
+        w := wait{
+            Action: func() (interface{}, error) {
+                describedVolume, err := m.Service.VolumeServicer.Describe(
+                    &service.VolumeDescribeRequest{
+                        DefaultRequestParams: defaultParams,
+                        VolumeIds:            []string{d.Id()},
+                    })
+                if err != nil {
+                    m.Log.Info(fmt.Sprintf("Volume describe failed for volume ID: %s, error: %v", d.Id(), err))
+                    return nil, err
+                }
+                m.Log.Info(fmt.Sprintf("Volume state after detach: %s", describedVolume.State))
+                if describedVolume.State != service.AvailableVolumeState {
+                    return nil, fmt.Errorf("volume state: not %s", service.AvailableVolumeState)
+                }
+                return describedVolume, nil
+            },
+            CompareFn: defaultWaitCompareFunc(),
+        }
+        _, err = w.Wait()
+        if err != nil {
+            return fmt.Errorf("error waiting for volume to detach: %s", d.Id())
+        }
+    }
+
+    // Now delete the volume
+    m.Log.Info(fmt.Sprintf("Deleting volume: %s", d.Id()))
     deleteOpts := &service.VolumeDeleteRequest{
         DefaultRequestParams: defaultParams,
         VolumeID:             d.Id(),
     }
     err = m.Service.VolumeServicer.Delete(deleteOpts)
-    // Volume not found
     if err != nil {
         if err.Error() == "404" {
-            return fmt.Errorf("volume %s not found", d.Id())
+            m.Log.Info(fmt.Sprintf("Volume not found during delete, skipping: %s", d.Id()))
+            d.SetId("")
+            return nil
         }
-        d.SetId("")
         return err
     }
 
+    // Wait for volume to be deleted
     w := wait{
         Action: func() (interface{}, error) {
             return m.Service.VolumeServicer.Describe(
@@ -220,10 +298,10 @@ func resourceVolumeDelete(d *schema.ResourceData, meta interface{}) (err error) 
     }
     _, err = w.Wait()
     if err != nil {
-        return fmt.Errorf("error wait for state image: %s", d.Id())
+        return fmt.Errorf("error waiting for volume deletion: %s", d.Id())
     }
 
-    m.Log.Info(fmt.Sprintf("volume terminated: %s", d.Id()))
+    m.Log.Info(fmt.Sprintf("Volume deleted successfully: %s", d.Id()))
     d.SetId("")
     return nil
 }

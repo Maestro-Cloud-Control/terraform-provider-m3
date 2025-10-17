@@ -93,6 +93,20 @@ func (mr *MockVolumeServicerMockRecorder) Describe(arg0 interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Describe", reflect.TypeOf((*MockVolumeServicer)(nil).Describe), arg0)
 }
 
+// Detach mocks base method.
+func (m *MockVolumeServicer) Detach(arg0 *service.VolumeDetachRequest) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Detach", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Detach indicates an expected call of Detach.
+func (mr *MockVolumeServicerMockRecorder) Detach(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Detach", reflect.TypeOf((*MockVolumeServicer)(nil).Detach), arg0)
+}
+
 // MockScriptServicer is a mock of ScriptServicer interface.
 type MockScriptServicer struct {
 	ctrl     *gomock.Controller

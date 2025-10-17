@@ -1,6 +1,19 @@
 CHANGELOG
 =========
 
+0.6.11
+=======
+* Enhanced volume resource with automatic detachment before deletion when volume is in-use
+* Added Detach method to VolumeService for explicit volume detachment operations
+* Improved volume deletion workflow with proper state checking and wait logic
+* Updated volume state constants: changed "available" to "detached" and clarified "in-use" as "attached"
+* Enhanced logging throughout volume operations (create, describe, detach, delete) for better debugging
+* Fixed volume describe request parameter naming: changed "volumesIds" to "volumeIds"
+* Added extended parameters to VolumeDescribeRequest to match new api: all, attached, system, availabilityZone, names
+* Improved error handling for 404 cases during volume operations
+* Fixed volume creation to wait for correct state based on attachment status
+* Moved InUseState constant from image.go to service-wide scope for reusability
+
 0.6.10
 =======
 * Added additional_data parameter to volume resource.

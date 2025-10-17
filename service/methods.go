@@ -16,6 +16,7 @@ const (
     //volumes
     MethodCreateVolume          = "CREATE_VOLUME"
     MethodCreateAndAttachVolume = "CREATE_AND_ATTACH_VOLUME"
+    MethodDetachVolume          = "DETACH_VOLUME"
     MethodDeleteVolume          = "REMOVE_VOLUME"
     MethodDescribeVolume        = "DESCRIBE_VOLUME"
 
