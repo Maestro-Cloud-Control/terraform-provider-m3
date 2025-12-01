@@ -218,7 +218,25 @@ func resourceVolumeDelete(d *schema.ResourceData, meta interface{}) (err error) 
             d.SetId("")
             return nil
         }
-        return err
+        // Retry without instanceId if describe failed with instanceId
+        if len(instanceId) > 0 {
+            m.Log.Info(fmt.Sprintf("Describe failed with instanceId, retrying without instanceId: %s", d.Id()))
+            describeOptsWithoutInstance := &service.VolumeDescribeRequest{
+                DefaultRequestParams: defaultParams,
+                VolumeIds:            []string{d.Id()},
+            }
+            volume, err = m.Service.VolumeServicer.Describe(describeOptsWithoutInstance)
+            if err != nil {
+                if err.Error() == "404" {
+                    m.Log.Info(fmt.Sprintf("Volume not found, skipping delete: %s", d.Id()))
+                    d.SetId("")
+                    return nil
+                }
+                return err
+            }
+        } else {
+            return err
+        }
     }
 
     m.Log.Info(fmt.Sprintf("Volume state: %s", volume.State))
