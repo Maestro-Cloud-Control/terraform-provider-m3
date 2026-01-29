@@ -1,6 +1,14 @@
 CHANGELOG
 =========
 
+0.6.12
+=======
+* Improved volume describe fallback: retry without instanceId if initial describe fails
+* Enhanced 404 handling during detach wait phase to gracefully handle deleted volumes
+* Refactored volume delete logic into `deleteVolumeWithRetry` function for better maintainability
+* Changed volume delete approach to retry-based with configurable attempts (10) and delay (60s)
+* Improved error logging during volume deletion operations
+
 0.6.11
 =======
 * Enhanced volume resource with automatic detachment before deletion when volume is in-use
